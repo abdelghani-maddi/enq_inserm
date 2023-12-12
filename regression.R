@@ -27,11 +27,11 @@ for (variable in variables_a_expliquer) {
   
   # Filtrer les données
   df <- datainserm %>%
-    filter(!(SEXE == "autre"))
+    filter(!(SEXE == "autre") & !(Statut == "Autres") & !(CORPS == "Autre")) # auu fait, il y a que 6 "autre".
   
   # Recodage de la variable
   recoded_variable <- paste0(variable, "_rec")
-  df[[recoded_variable]] <- datainserm[[variable]] %>%
+  df[[recoded_variable]] <- df[[variable]] %>%
     fct_recode(
       "0" = "Pas importante du tout",
       "0" = "Peu importante",
@@ -40,7 +40,8 @@ for (variable in variables_a_expliquer) {
     )
   
   # Régression logistique
-  model <- glm(as.formula(paste(recoded_variable, "~ SEXE + RAGE3 + Statut + Domainescientifique1")), data = df, family = binomial)
+  model <- glm(as.formula(paste(recoded_variable, "~ SEXE + RAGE3 + Statut + Domainescientifique1 + CORPS + Direquipe")), 
+               data = df, family = binomial)
   
   # Graphique des coefficients
   plot <- ggcoef_model(model, exponentiate = TRUE) +
