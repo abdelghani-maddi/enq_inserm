@@ -18,7 +18,7 @@ library(forcats)
 
 
 # Données ----
-datainserm <- read_excel("~/Documents/enquete inserm/datainserm.xlsx")
+datainserm <- read_excel("~/Documents/enquete inserm/inserm/datainserm_scores.xlsx")
 
 ############################
 # Liste des variables à expliquer de type :

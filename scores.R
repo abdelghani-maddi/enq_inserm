@@ -120,6 +120,7 @@ df <- df %>%
 datainserm <- merge(datainserm, df, by = "row.names")
 
 ###################################################
+datainserm_scores <- write.xlsx(datainserm, "datainserm_scores.xlsx")
 
 
 
