@@ -94,7 +94,6 @@ var_label(datainserm$Partadmin_recod) <- "Degré administration"
 ############################
 ############################
 
-variables_a_expliquer <- c("Q1_r1", "Q1_r2", "Q1_r3", "Q1_r4", "Q1_r5", "Q1_r6", "Q1_r7")
 
 # Définir les modalités de référence pour chaque variable de contrôle
 modalites_reference <- c(
@@ -111,28 +110,28 @@ modalites_reference <- c(
   Partadmin_recod = "Moyen"
 )
 
-# # Transformer toutes les variables explicatives en facteur
-look <- datainserm %>%
-   select(starts_with("Q1_"),POIDS, SEXE, RAGE3, Statut, CORPS, Domainescientifique1, Dirunite, Direquipe, Delegation, Rechfond_recod, Partrechclin_recod, Partadmin_recod)
-look_for(look)
 
 # Créer une liste pour stocker les graphiques
 plots_list <- list()
 
 # Boucle sur chaque variable à expliquer
 for (variable in variables_a_expliquer) {
+
+############################################################################################ 
+  # Décommenter cette partie si la variable à expliquer est Q1 ----
+  variables_a_expliquer <- c("Q1_r1", "Q1_r2", "Q1_r3", "Q1_r4", "Q1_r5", "Q1_r6", "Q1_r7")
   
   # Filtrer les données
   df <- datainserm %>%
-    filter(!(SEXE == "autre") & 
-             !(Statut == "Autres") & 
-             !(CORPS == "Autre") & 
+    filter(!(SEXE == "autre") &
+             !(Statut == "Autres") &
+             !(CORPS == "Autre") &
              !(CORPS == "Adjoint technique de la recherche") &
              !(Delegation == "En attente d’affectation") &
              !(Domainescientifique1 == "Ne sait pas") &
              !(Domainescientifique1 == "Ne se prononce pas"))
-  
- 
+
+
   # Recodage de la variable
   recoded_variable <- paste0(variable, "_rec")
   df[[recoded_variable]] <- df[[variable]] %>%
@@ -142,7 +141,40 @@ for (variable in variables_a_expliquer) {
       "1" = "Assez importante",
       "1" = "Très importante",
     )
-  
+
+  #####################################################################
+  #####################################################################
+  #####################################################################
+  # Décommenter cette partie si la variable à expliquer est Q5 ----
+  # 
+  # variables_a_expliquer <- c("Q5")
+  # 
+  # # Filtrer les données
+  # df <- datainserm %>%
+  #   filter(!(SEXE == "autre") & 
+  #            !(Statut == "Autres") & 
+  #            !(CORPS == "Autre") & 
+  #            !(CORPS == "Adjoint technique de la recherche") &
+  #            !(Delegation == "En attente d’affectation") &
+  #            !(Domainescientifique1 == "Ne sait pas") &
+  #            !(Domainescientifique1 == "Ne se prononce pas") &
+  #            !(Q5 == "Non concerné") &
+  #            !(Q5 == "Ne se prononce pas"))
+  # 
+  # 
+  # # Recodage de la variable
+  # recoded_variable <- paste0(variable, "_rec")
+  # df[[recoded_variable]] <- df[[variable]] %>%
+  #   fct_recode(
+  #     "0" = "Jamais",
+  #     "0" = "Rarement",
+  #     "1" = "Parfois",
+  #     "1" = "Souvent",
+  #   )
+  # 
+  #####################################################################
+  #####################################################################
+  #####################################################################
   # Spécifier la modalité de référence pour chaque variable explicative
   for (var_name in names(modalites_reference)) {
     df[[var_name]] <- fct_relevel(df[[var_name]], modalites_reference[var_name])
