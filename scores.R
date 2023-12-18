@@ -1,9 +1,9 @@
-# Regression
+# Calcul des scores
 
 #####################################################################
-###          Analyse de données           ###
+###                       Analyse de données                      ###
 #####################################################################
-rm(list = ls()) #supprimer tous les objets 
+rm(list = ls())  # supprimer tous les objets 
 
 
 # Chargement des packages ----
