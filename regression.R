@@ -6,7 +6,6 @@
 rm(list = ls()) #supprimer tous les objets 
 
 
-
 # Chargement des packages ----
 library(tidyverse)
 library(readxl)
@@ -39,7 +38,10 @@ for (variable in variables_a_expliquer) {
   
   # Filtrer les données
   df <- datainserm %>%
-    filter(!(SEXE == "autre") & !(Statut == "Autres") & !(CORPS == "Autre") & !(CORPS == "Adjoint technique de la recherche") )
+    filter(!(SEXE == "autre") & 
+           !(Statut == "Autres") & 
+           !(CORPS == "Autre") & 
+           !(CORPS == "Adjoint technique de la recherche") )
   
   # Recodage de la variable
   recoded_variable <- paste0(variable, "_rec")
@@ -72,57 +74,3 @@ for (plot in plots_list) {
   
   
 #######################
-
-# Liste des valeurs de recodage communes à tous les ensembles de variables
-common_recode_values <- list(
-  "Toutafaitdaccord" = 4, 
-  "Plutotdaccord" = 3, 
-  "Plutotpasdaccord" = 2, 
-  "Pasdaccorddutout" = 1
-)
-
-# Supprimer les caractères spéciaux d'une colonne
-remove_special_chars <- function(x) {
-  iconv(as.character(x), to = "ASCII//TRANSLIT") %>%
-    str_replace_all("[^a-zA-Z0-9]", "")
-}
-
-# Appliquer la suppression des caractères spéciaux à toutes les colonnes
-df <- datainserm %>%
-  select(starts_with(c("Q7", "Q50_", "Q51"))) %>%
-  mutate(across(everything(), remove_special_chars))
-
-# Récodage pour chaque ensemble de variables
-df <- df %>%
-  mutate(across(everything(), 
-                ~ {
-                  recoded <- recode_factor(., !!!common_recode_values)
-                  recoded
-                },
-                .names = "{.col}_Recode"
-  ))
-
-############
-
-# Modifier le type des colonnes _Recode en numérique
-df <- df %>%
-  mutate_at(vars(ends_with("_Recode")), as.numeric)
-
-# Fonction pour calculer les moyennes par groupe de variables
-calculate_group_means <- function(data, prefixes, suffix) {
-  recoded_columns <- names(data) %>% 
-    grep(paste0("^", prefixes), value = TRUE) %>% 
-    grep(paste0(suffix, "$"), value = TRUE)
-  
-  data %>%
-    rowwise() %>%
-    mutate(Mean = mean(c_across(all_of(recoded_columns)), na.rm = TRUE))
-}
-
-# Liste des préfixes pour tous les ensembles de variables
-prefixes <- c("Q7", "Q50", "Q51")
-
-
-# Calculer les moyennes par groupe de variables
-df_means <- calculate_group_means(df, prefixes, suffix = "_Recode")
-
