@@ -206,3 +206,96 @@ for (plot in plots_list) {
 model |> 
   tbl_regression(intercept = TRUE) |> 
   bold_labels()
+
+
+
+
+##############################################################
+##############################################################
+##############################################################
+
+## .        Regression sur des variables continues         ##
+
+##############################################################
+##############################################################
+##############################################################
+# Package bénomiale négative
+library(MASS)
+
+# Créer une liste pour stocker les graphiques
+plots_list <- list()
+
+# Sélectionner les variables expliquées se terminant par "_score"
+variables_a_expliquer <- grep("_score$", names(datainserm), value = TRUE)
+
+# Boucle sur chaque variable à expliquer
+for (variable in variables_a_expliquer) {
+  
+  # Filtrer les données
+  df <- datainserm %>%
+    filter(!(SEXE == "autre") &
+             !(Statut == "Autres") &
+             !(CORPS == "Autre") &
+             !(CORPS == "Adjoint technique de la recherche") &
+             !(Delegation == "En attente d’affectation") &
+             !(Domainescientifique1 == "Ne sait pas") &
+             !(Domainescientifique1 == "Ne se prononce pas"))
+  
+  # Spécifier la modalité de référence pour chaque variable explicative
+  for (var_name in names(modalites_reference)) {
+    df[[var_name]] <- fct_relevel(df[[var_name]], modalites_reference[var_name])
+  }
+  
+  # Régression Linéaire
+  linear_model <- lm(as.formula(paste(variable, "~ SEXE + RAGE3 + Statut + CORPS +  
+                                       Domainescientifique1 + Dirunite + Direquipe + Delegation +
+                                       Rechfond_recod + Partrechclin_recod + Partadmin_recod")), 
+                     data = df, 
+                     weights = POIDS)
+  
+  # Régression Poisson
+  poisson_model <- glm(as.formula(paste(variable, "~ SEXE + RAGE3 + Statut + CORPS +  
+                                            Domainescientifique1 + Dirunite + Direquipe + Delegation +
+                                            Rechfond_recod + Partrechclin_recod + Partadmin_recod")), 
+                       data = df, 
+                       family = poisson,
+                       weights = POIDS)
+  
+  # Régression binomial Negative
+  negbin_model <- MASS::glm.nb(as.formula(paste(variable, "~ SEXE + RAGE3 + Statut + CORPS +  
+                                               Domainescientifique1 + Dirunite + Direquipe + Delegation +
+                                               Rechfond_recod + Partrechclin_recod + Partadmin_recod")), 
+                               data = df, 
+                               weights = POIDS)
+  
+  # Comparer les critères AIC pour choisir le meilleur model
+  aic_values <- c(AIC(linear_model), AIC(poisson_model), AIC(negbin_model))
+  best_model <- which.min(aic_values)
+  
+  if (best_model == 1) {
+    # Régression linéaire
+    model <- linear_model
+  } else if (best_model == 2) {
+    # Regression Poisson
+    model <- poisson_model
+  } else {
+    # Régression binomial Negative
+    model <- negbin_model
+  }
+  
+  # Graphique des coefficients
+  plot <- ggcoef_model(model) +
+    ggtitle(paste("Régression pour", variable)) +
+    coord_cartesian(xlim = c(-0.5, 0.5))  # Définir les limites de l'échelle
+  
+  # Stocker le graphique dans la liste
+  plots_list[[variable]] <- plot
+}
+
+# Imprimer tous les graphiques
+for (plot in plots_list) {
+  print(plot)
+}
+
+
+
