@@ -219,8 +219,10 @@ model |>
 ##############################################################
 ##############################################################
 ##############################################################
-# Package bénomiale négative
+# Package bénomiale négative, tests..
 library(MASS)
+library(ggdist)
+library(car)
 
 # Créer une liste pour stocker les graphiques
 plots_list <- list()
@@ -286,16 +288,33 @@ for (variable in variables_a_expliquer) {
   # Graphique des coefficients
   plot <- ggcoef_model(model) +
     ggtitle(paste("Régression pour", variable)) +
-    coord_cartesian(xlim = c(-0.5, 0.5))  # Définir les limites de l'échelle
+    coord_cartesian(xlim = c(-0.3, 0.3))  # Définir les limites de l'échelle
   
   # Stocker le graphique dans la liste
   plots_list[[variable]] <- plot
+ 
 }
-
 # Imprimer tous les graphiques
 for (plot in plots_list) {
   print(plot)
 }
 
+####################################
+####################################
 
+# Diagnostics plots
+par(mfrow=c(2,2))
+plot(model)
 
+# Test de normalité des résidus
+shapiro.test(model$residuals)
+
+# Test de l'homoscédasticité
+bptest(model)
+
+# Influence plots
+par(mfrow=c(1,1))
+influencePlot(model)
+
+####################################
+####################################
